@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Politano's Art</title>
+  <style>
+    :root {
+      --paper: #f3efe6;
+      --ink: #1c1915;
+      --muted: #5e584f;
+      --line: #d9d1c3;
+      --card: #fffcf7;
+      --red: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.5 "Segoe UI", sans-serif;
+    }
+    header, main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 36px 0 12px; }
+    h1 { font: 500 34px/1.1 Palatino, "Palatino Linotype", Georgia, serif; margin: 0 0 6px; }
+    .motto { font: 500 20px/1.35 Palatino, "Palatino Linotype", Georgia, serif; margin: 0; max-width: 40em; }
+    h2.series { font: 500 28px/1.2 Palatino, "Palatino Linotype", Georgia, serif; margin: 28px 0 4px; }
+    .series-note { margin: 0 0 14px; color: var(--muted); }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 0;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav a {
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+    .nav a[aria-current="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .lang { display: flex; gap: 6px; margin-left: auto; }
+    .lang button {
+      font: inherit;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    section { scroll-margin-top: 72px; }
+    .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 18px 0; }
+    #q {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font: inherit;
+      margin-left: auto;
+      min-width: 180px;
+    }
+    #collections { padding-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding-bottom: 12px; }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    article img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block; }
+    article div { padding: 12px 12px 14px; }
+    article h2 { font: 500 18px/1.25 Palatino, "Palatino Linotype", Georgia, serif; margin: 0 0 4px; }
+    article p { margin: 0; color: var(--muted); font-size: 14px; }
+    dialog {
+      width: min(880px, calc(100% - 24px));
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      background: var(--card);
+      color: var(--ink);
+    }
+    dialog::backdrop { background: rgba(28, 25, 21, 0.55); }
+    .sheet { display: grid; grid-template-columns: 1.1fr 0.9fr; }
+    .sheet img { width: 100%; height: 100%; max-height: 78vh; object-fit: contain; background: #fff; }
+    .copy { padding: 22px 22px 26px; }
+    .copy h2 { font: 500 30px/1.15 Palatino, "Palatino Linotype", Georgia, serif; margin: 0 0 8px; }
+    .meta { color: var(--muted); margin: 0 0 14px; }
+    .copy p { margin: 0 0 12px; }
+    .id { font-family: Consolas, monospace; font-size: 13px; color: var(--red); }
+    form { margin: 0; }
+    .close { margin-top: 8px; }
+    @media (max-width: 720px) {
+      #q { margin-left: 0; width: 100%; }
+      .sheet { grid-template-columns: 1fr; }
+      .sheet img { max-height: 46vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Politano's Art</h1>
+    <p class="motto">Wladimiro Politano — Geometria, immaginazione e spazio. Un percorso artistico tra Italia e Americhe</p>
+  </header>
+  <main>
+    <nav id="collection-nav" class="nav" aria-label="Collections">
+      <div id="collection-links" class="nav-links"></div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-label="English" aria-pressed="true">EN</button>
+        <button type="button" data-lang="it" aria-label="Italiano" aria-pressed="false">IT</button>
+      </div>
+    </nav>
+    <div class="bar">
+      <input id="q" type="search" placeholder="Search titles" aria-label="Search titles">
+    </div>
+    <div id="collections"></div>
+  </main>
+  <dialog id="detail">
+    <form method="dialog">
+      <div class="sheet">
+        <img id="detail-image" alt="">
+        <div class="copy">
+          <h2 id="detail-title"></h2>
+          <p class="meta" id="detail-meta"></p>
+          <p id="detail-text"></p>
+          <p class="id" id="detail-id"></p>
+          <button class="close" value="close">Close</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+  <script src="collection.js"></script>
+  <script>
+    const works = window.COLLECTION.works;
+    const collections = document.getElementById("collections");
+    const collectionNav = document.getElementById("collection-nav");
+    const collectionLinks = document.getElementById("collection-links");
+    const query = document.getElementById("q");
+    const dialog = document.getElementById("detail");
+    const copy = {
+      en: {
+        search: "Search titles",
+        close: "Close",
+        collections: "Collections",
+        language: "Language",
+        piece: "Piece",
+        work: "work",
+        works: "works",
+        certificate: "Certificate of authenticity for the physical work \"{name}\" by Wladimiro Politano.",
+        dated: "The catalog sheet dates this painting {year}.",
+        originSyntax: "Plate from The Syntax of Geometric Art, Politano Fine Art, Miami, 2014.",
+        originAbstract: "Plate from Abstract Geometric Paintings, Politano Fine Arts, 2025. The sheet marks the work U/P.",
+        token: "One token corresponds to this one physical piece. The certificate is meant to be transferred with the work. The contract does not hold the object."
+      },
+      it: {
+        search: "Cerca titoli",
+        close: "Chiudi",
+        collections: "Collezioni",
+        language: "Lingua",
+        piece: "Opera",
+        work: "opera",
+        works: "opere",
+        certificate: "Certificato di autenticità dell'opera fisica «{name}» di Wladimiro Politano.",
+        dated: "La scheda di catalogo data questo dipinto al {year}.",
+        originSyntax: "Tavola da The Syntax of Geometric Art, Politano Fine Art, Miami, 2014.",
+        originAbstract: "Tavola da Abstract Geometric Paintings, Politano Fine Arts, 2025. La scheda indica l'opera come U/P.",
+        token: "Un token corrisponde a questa sola opera fisica. Il certificato è destinato a essere trasferito insieme all'opera. Il contratto non detiene l'oggetto."
+      }
+    };
+    const seriesNotes = {
+      "The Syntax of Geometric Art": {
+        en: "2014 catalog.",
+        it: "Catalogo del 2014."
+      },
+      "Abstract Geometric Paintings": {
+        en: "Politano Fine Arts, 2025. Acrylic on canvas. The sheet does not include Abstract IX.",
+        it: "Politano Fine Arts, 2025. Acrilico su tela. La scheda non comprende Abstract IX."
+      }
+    };
+    const seriesNames = {
+      "The Syntax of Geometric Art": "La sintassi dell'arte geometrica",
+      "Abstract Geometric Paintings": "Dipinti geometrici astratti"
+    };
+    const mediaNames = {
+      "Aluminum, granite base": "Alluminio, base in granito",
+      "Aluminum": "Alluminio",
+      "Acrylic on canvas": "Acrilico su tela"
+    };
+    const kindNames = {
+      Sculpture: "Scultura",
+      Painting: "Dipinto"
+    };
+    const savedLang = new URLSearchParams(location.search).get("lang") || localStorage.getItem("politano-lang");
+    let lang = savedLang === "it" || (savedLang !== "en" && (navigator.language || "").toLowerCase().startsWith("it")) ? "it" : "en";
+    let activeWork = null;
+    let currentSeries = "";
+
+    function text(key, values) {
+      let line = copy[lang][key];
+      if (values) {
+        for (const name of Object.keys(values)) line = line.replace("{" + name + "}", values[name]);
+      }
+      return line;
+    }
+
+    function src(work) {
+      return "../" + work.image;
+    }
+
+    function seriesSlug(name) {
+      return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+
+    function labelSeries(name) {
+      return lang === "it" && seriesNames[name] ? seriesNames[name] : name;
+    }
+
+    function labelMedium(value) {
+      return lang === "it" && mediaNames[value] ? mediaNames[value] : value;
+    }
+
+    function labelKind(value) {
+      return lang === "it" && kindNames[value] ? kindNames[value] : value;
+    }
+
+    function labelDimensions(value) {
+      if (!value || lang !== "it") return value;
+      return value.replace(/ in$/, " pollici");
+    }
+
+    function blurb(work) {
+      const medium = labelMedium(work.medium);
+      const dimensions = labelDimensions(work.dimensions);
+      const parts = [
+        text("certificate", { name: work.name }),
+        medium + (dimensions ? ", " + dimensions + "." : ".")
+      ];
+      if (work.year && work.series === "Abstract Geometric Paintings") parts.push(text("dated", { year: work.year }));
+      parts.push(work.series === "Abstract Geometric Paintings" ? text("originAbstract") : text("originSyntax"));
+      parts.push(text("token"));
+      return parts.join(" ");
+    }
+
+    function rememberLang() {
+      localStorage.setItem("politano-lang", lang);
+      const url = new URL(location.href);
+      url.searchParams.set("lang", lang);
+      history.replaceState(null, "", url.pathname + url.search + url.hash);
+    }
+
+    function kindRank(value) {
+      if (value === "Painting") return 0;
+      if (value === "Sculpture") return 1;
+      return 2;
+    }
+
+    function collectionGroups(list) {
+      const groups = [];
+      for (const work of list) {
+        const name = work.series || "Certificates";
+        let group = groups.find((item) => item.name === name);
+        if (!group) {
+          group = { name: name, works: [] };
+          groups.push(group);
+        }
+        group.works.push(work);
+      }
+      for (const group of groups) {
+        group.works.sort((a, b) => kindRank(a.kind) - kindRank(b.kind));
+      }
+      groups.sort((a, b) => {
+        const rank = (group) => (group.works.every((work) => work.kind === "Painting") ? 0 : 1);
+        return rank(a) - rank(b);
+      });
+      return groups;
+    }
+
+    function setCurrent(name) {
+      currentSeries = name;
+      for (const link of collectionNav.querySelectorAll("a")) {
+        if (link.dataset.series === name) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      }
+    }
+
+    function showCollection(name) {
+      if (query.value) {
+        query.value = "";
+        apply();
+      }
+      const section = document.getElementById(seriesSlug(name));
+      if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+      setCurrent(name);
+      const url = new URL(location.href);
+      url.hash = seriesSlug(name);
+      history.replaceState(null, "", url.pathname + url.search + url.hash);
+    }
+
+    function buildNav() {
+      collectionLinks.replaceChildren();
+      for (const group of collectionGroups(works)) {
+        const name = group.name;
+        const link = document.createElement("a");
+        link.href = "#" + seriesSlug(name);
+        link.dataset.series = name;
+        link.textContent = labelSeries(name);
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          showCollection(name);
+        });
+        collectionLinks.append(link);
+      }
+      if (currentSeries) setCurrent(currentSeries);
+    }
+
+    function cardFor(work) {
+      const card = document.createElement("article");
+      card.tabIndex = 0;
+      const img = document.createElement("img");
+      img.src = src(work);
+      img.alt = work.name;
+      const body = document.createElement("div");
+      const title = document.createElement("h2");
+      title.textContent = work.name;
+      const meta = document.createElement("p");
+      meta.textContent = [labelMedium(work.medium), labelDimensions(work.dimensions), work.year].filter(Boolean).join(" · ");
+      body.append(title, meta);
+      card.append(img, body);
+      card.addEventListener("click", () => openWork(work));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") openWork(work);
+      });
+      return card;
+    }
+
+    function show(list) {
+      collections.replaceChildren();
+      for (const group of collectionGroups(list)) {
+        const section = document.createElement("section");
+        section.id = seriesSlug(group.name);
+        const heading = document.createElement("h2");
+        heading.className = "series";
+        heading.textContent = labelSeries(group.name);
+        const note = document.createElement("p");
+        note.className = "series-note";
+        const about = (seriesNotes[group.name] && seriesNotes[group.name][lang]) || "";
+        const count = group.works.length + " " + text(group.works.length === 1 ? "work" : "works");
+        note.textContent = about ? count + ". " + about : count;
+        const cards = document.createElement("div");
+        cards.className = "grid";
+        for (const work of group.works) cards.append(cardFor(work));
+        section.append(heading, note, cards);
+        collections.append(section);
+      }
+    }
+
+    function fillDetail(work) {
+      document.getElementById("detail-image").src = src(work);
+      document.getElementById("detail-image").alt = work.name;
+      document.getElementById("detail-title").textContent = work.name;
+      document.getElementById("detail-meta").textContent = [labelKind(work.kind), labelMedium(work.medium), labelDimensions(work.dimensions), work.year ? work.year : ""]
+        .filter(Boolean)
+        .join(" · ");
+      document.getElementById("detail-text").textContent = blurb(work);
+      document.getElementById("detail-id").textContent = text("piece") + " " + work.token_id + " · " + work.slug;
+    }
+
+    function openWork(work) {
+      activeWork = work;
+      fillDetail(work);
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function searchable(work) {
+      return [
+        work.name,
+        work.slug,
+        work.medium,
+        mediaNames[work.medium] || "",
+        work.kind,
+        kindNames[work.kind] || "",
+        work.series,
+        seriesNames[work.series] || ""
+      ].join(" ").toLowerCase();
+    }
+
+    function apply() {
+      const queryText = query.value.trim().toLowerCase();
+      show(works.filter((work) => !queryText || searchable(work).includes(queryText)));
+    }
+
+    function render() {
+      document.documentElement.lang = lang;
+      query.placeholder = text("search");
+      query.setAttribute("aria-label", text("search"));
+      collectionNav.setAttribute("aria-label", text("collections"));
+      document.querySelector(".lang").setAttribute("aria-label", text("language"));
+      document.querySelector(".close").textContent = text("close");
+      for (const button of document.querySelectorAll(".lang button")) {
+        button.setAttribute("aria-pressed", button.dataset.lang === lang ? "true" : "false");
+      }
+      const y = window.scrollY;
+      buildNav();
+      apply();
+      window.scrollTo(0, y);
+      if (activeWork && dialog.open) fillDetail(activeWork);
+    }
+
+    function setLang(next) {
+      lang = next === "it" ? "it" : "en";
+      rememberLang();
+      render();
+    }
+
+    for (const button of document.querySelectorAll(".lang button")) {
+      button.addEventListener("click", () => setLang(button.dataset.lang));
+    }
+    dialog.addEventListener("close", () => { activeWork = null; });
+    query.addEventListener("input", apply);
+    render();
+    const opening = collectionGroups(works).map((group) => group.name).find((name) => seriesSlug(name) === location.hash.slice(1));
+    if (opening) showCollection(opening);
+  </script>
+</body>
+</html>
